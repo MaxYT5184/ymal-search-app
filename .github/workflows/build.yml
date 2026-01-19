@@ -1,0 +1,38 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-tauri:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [windows-latest]
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+    
+    - name: Install Rust (Windows)
+      if: matrix.platform == 'windows-latest'
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: x86_64-pc-windows-msvc
+    
+    - name: Build Ymal Search EXE
+      run: |
+        npm install
+        npm run build
+      env:
+        TAURI_URL: https://search.ymal.space
+        TAURI_APP_NAME: Ymal Search
+        TAURI_ICON: icon.ico
